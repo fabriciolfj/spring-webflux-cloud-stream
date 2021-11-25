@@ -20,7 +20,7 @@ public class CustomerMessage {
                             .document(c.getDocument())
                             .code(c.getCode())
                             .build();
-                    streamBridge.send("fraud-topicz", dto);
+                    streamBridge.send("fraud-topic", dto);
                     return Mono.just(c);
                 }).log();
     }
