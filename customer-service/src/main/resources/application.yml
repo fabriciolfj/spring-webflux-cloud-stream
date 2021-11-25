@@ -1,0 +1,52 @@
+server:
+  port: 9090
+  netty:
+    connection-timeout: 5s
+  shutdown: graceful
+
+spring:
+  application:
+    name: customer-service
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
+  r2dbc:
+    username: admin
+    password: admin
+    url: r2dbc:postgresql://localhost:5433/db
+    pool:
+      max-create-connection-time: 15s
+      initial-size: 5
+      max-size: 10
+  flyway:
+    url: jdbc:postgresql://localhost:5433/db
+    user: ${spring.r2dbc.username}
+    password: ${spring.r2dbc.password}
+  rabbitmq:
+    host: localhost
+    password: password
+    username: user
+    connection-timeout: 15s
+  cloud:
+    stream:
+      binders:
+        rabbit:
+          type: rabbit
+      bindings:
+        analyzefraud-out-0:
+          destination: fraud-topic
+        customerfraud-in-0:
+          destination: customer-topic
+          contentType: application/json
+          group: ${spring.application.name}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
