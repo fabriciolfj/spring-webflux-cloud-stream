@@ -1,6 +1,7 @@
 package com.github.fabrliciolfj.customerservice.providers;
 
 import com.github.fabrliciolfj.customerservice.entities.Customer;
+import com.github.fabrliciolfj.customerservice.entities.Status;
 import com.github.fabrliciolfj.customerservice.exceptions.CustomerNotFoundException;
 import com.github.fabrliciolfj.customerservice.exceptions.CustomerSaveException;
 import com.github.fabrliciolfj.customerservice.providers.database.CustomerDataMapper;
@@ -25,5 +26,15 @@ public class CustomerDatabaseProvider {
         return repository.findByCode(code)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new CustomerNotFoundException("Customer not found: " + code))))
                 .map(data -> CustomerDataMapper.toEntity(data));
+    }
+
+    public Mono<?> updateStatus(final Status status, final String code) {
+        return repository.findByCode(code)
+                .flatMap(c -> {
+                    c.setStatus(status.getDescribe());
+                    return repository.save(c);
+                })
+                .log()
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("Customer not found: " + code))));
     }
 }
